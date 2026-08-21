@@ -1,5 +1,5 @@
+// 单个商品购买面板
 "use client";
-
 import { useState } from "react";
 import type { ShopifyProduct } from "@/types/types";
 import { useRouter } from "next/navigation";
@@ -49,7 +49,6 @@ export default function PurchasePanel({
       setLoading(false);
     }
   };
-
   const decreaseQuantity = () => {
     setQuantity((q) => Math.max(1, q - 1));
   };

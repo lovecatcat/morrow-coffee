@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import CartList, { CartView } from "@/components/CartList";
+import CartList, { type CartView } from "@/components/CartList";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { getCart } from "@/lib/shopify";
@@ -12,14 +12,13 @@ export const metadata: Metadata = {
 
  
 export default async function CartPage() {
-const cookieStore = await cookies();
+  const cookieStore = await cookies();
   const cartId = cookieStore.get("shopifyCartId")?.value;
   let data: CartView = null;
   try {
     if (cartId) {
       const cart = await getCart(cartId);
-      console.log(cart);
-      data = cart
+      data = cart;
     }
   } catch (error) {
     data = null;

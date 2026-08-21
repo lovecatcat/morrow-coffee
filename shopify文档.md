@@ -43,3 +43,9 @@
   2. 亲手写一次 GraphQL 请求，能真正理解 Storefront API。
   3. Next.js + Shopify 对普通 React/Next.js 岗位也有展示价值。
   4. 项目部署到 Vercel更自然。
+
+
+
+ merchandise.id → 商品变体 ID，只用于 Add to cart
+  item.id        → 购物车行 ID，用于修改数量
+  cartId         → 整个购物车 ID，由 Route 从 Cookie 获取
