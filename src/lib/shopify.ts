@@ -7,6 +7,7 @@ import type {
   CartLinesAddQueryResult,
   CartQueryResult,
   CartLinesUpdateQueryResult,
+  CartLinesRemoveQueryResult,
   CartLineUpdateInput,
 } from "@/types/types";
 
@@ -363,6 +364,83 @@ export async function cartLinesUpdate(
 
   if (!result.cart) {
     throw new Error("Shopify did not update the cart");
+  }
+
+  return result.cart;
+}
+
+const cartLinesRemoveMutation = `
+  mutation CartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
+    cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
+      cart {
+        id
+        totalQuantity
+        checkoutUrl
+        cost {
+          subtotalAmount {
+            amount
+            currencyCode
+          }
+          totalAmount {
+            amount
+            currencyCode
+          }
+        }
+        lines(first: 20) {
+          nodes {
+            id
+            quantity
+            cost {
+              totalAmount {
+                amount
+                currencyCode
+              }
+            }
+            merchandise {
+              ... on ProductVariant {
+                id
+                title
+                price {
+                  amount
+                  currencyCode
+                }
+                image {
+                  url
+                  altText
+                }
+                product {
+                  title
+                  handle
+                }
+              }
+            }
+          }
+        }
+      }
+      userErrors {
+        field
+        message
+        code
+      }
+    }
+  }
+`;
+
+export async function cartLinesRemove(cartId: string, lineIds: string[]) {
+  const data = await shopifyFetch<CartLinesRemoveQueryResult>({
+    query: cartLinesRemoveMutation,
+    variables: { cartId, lineIds },
+    cache: "no-store",
+  });
+
+  const result = data.cartLinesRemove;
+
+  if (result.userErrors.length > 0) {
+    throw new Error(result.userErrors.map((error) => error.message).join(", "));
+  }
+
+  if (!result.cart) {
+    throw new Error("Shopify did not remove the cart line");
   }
 
   return result.cart;

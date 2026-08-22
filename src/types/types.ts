@@ -142,3 +142,14 @@ export type CartLinesUpdateQueryResult = {
     }>;
   };
 };
+
+export type CartLinesRemoveQueryResult = {
+  cartLinesRemove: {
+    cart: Cart | null;
+    userErrors: Array<{
+      field: string[] | null;
+      message: string;
+      code?: string;
+    }>;
+  };
+};

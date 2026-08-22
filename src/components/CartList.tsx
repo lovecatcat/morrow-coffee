@@ -13,10 +13,12 @@ function CartItem({
   item,
   isUpdating,
   onQuantityChange,
+  onRemove,
 }: {
   item: CartLine;
   isUpdating: boolean;
   onQuantityChange: (lineId: string, quantity: number) => void;
+  onRemove: (lineId: string) => void;
 }) {
   const merchandise = item.merchandise;
 
@@ -66,8 +68,13 @@ function CartItem({
             +
           </button>
         </div>
-        <button className="cart-remove" type="button" disabled>
-          Remove
+        <button
+          className="cart-remove"
+          type="button"
+          disabled={isUpdating}
+          onClick={() => onRemove(item.id)}
+        >
+          {isUpdating ? "Updating..." : "Remove"}
         </button>
       </div>
 
@@ -119,6 +126,38 @@ export default function CartList({ cart }: { cart: CartView | null }) {
     }
   }
 
+  async function removeLine(lineId: string) {
+    setUpdatingLineId(lineId);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/cart", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lineIds: [lineId] }),
+      });
+      const data = (await response.json()) as {
+        cart?: Cart;
+        error?: string;
+      };
+
+      if (!response.ok || !data.cart) {
+        throw new Error(data.error || "Unable to remove the item");
+      }
+
+      setCurrentCart(data.cart);
+      router.refresh();
+    } catch (removeError) {
+      setError(
+        removeError instanceof Error
+          ? removeError.message
+          : "Unable to remove the item",
+      );
+    } finally {
+      setUpdatingLineId(null);
+    }
+  }
+
   if (!currentCart || currentCart.lines.nodes.length === 0) {
     return (
       <section className="empty-cart page-shell">
@@ -152,6 +191,7 @@ export default function CartList({ cart }: { cart: CartView | null }) {
               isUpdating={updatingLineId === item.id}
               key={item.id}
               onQuantityChange={updateQuantity}
+              onRemove={removeLine}
             />
           ))}
         </div>
